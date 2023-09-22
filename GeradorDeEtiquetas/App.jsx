@@ -6,37 +6,21 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 const App = () => {
-  const [selectedCondition, setSelectedCondition] = useState(null);
-  const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedCondition, setSelectedCondition] = useState('');
+  const [selectedFood, setSelectedFood] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const foodValidity = {
-    Refrigerado: {
-      'Carne Bovina': 3,
-      'Peixe Fresco': 1,
-      'Frango': 2,
-    },
-    'Congelado -10°C a -18°C': {
-      'Carne Bovina': 120,
-      'Peixe Fresco': 60,
-      'Frango': 90,
-    },
-    'Congelado Temperatura menor que -18°C': {
-      'Carne Bovina': 365,
-      'Peixe Fresco': 180,
-      'Frango': 270,
-    },
-    'Seco (Após Abertura da Embalagem)': {
-      'Arroz': 180,
-      'Feijão': 180,
-      'Macarrão': 180,
-    },
+  const handleCalculate = () => {
+    Alert.alert(
+      "Etiqueta",
+      `Condição: ${selectedCondition}\nAlimento: ${selectedFood}\nData: ${date.toDateString()}`
+    );
   };
 
   return (
@@ -49,10 +33,10 @@ const App = () => {
         selectedValue={selectedCondition}
         onValueChange={(itemValue) => setSelectedCondition(itemValue)}
       >
-        <Picker.Item label="Selecione uma condição" value={null} />
-        {Object.keys(foodValidity).map((condition) => (
-          <Picker.Item key={condition} label={condition} value={condition} />
-        ))}
+        <Picker.Item label="Refrigerado" value="Refrigerado" />
+        <Picker.Item label="Congelado -10°C a -18°C" value="Congelado -10°C a -18°C" />
+        <Picker.Item label="Congelado Temperatura menor que -18°C" value="Congelado Temperatura menor que -18°C" />
+        <Picker.Item label="Seco (Após Abertura da Embalagem)" value="Seco (Após Abertura da Embalagem)" />
       </Picker>
 
       <Text>Alimento:</Text>
@@ -61,13 +45,14 @@ const App = () => {
         selectedValue={selectedFood}
         onValueChange={(itemValue) => setSelectedFood(itemValue)}
       >
-        <Picker.Item label="Selecione um alimento" value={null} />
-        {selectedCondition && Object.keys(foodValidity[selectedCondition]).map((food) => (
-          <Picker.Item key={food} label={food} value={food} />
-        ))}
+        <Picker.Item label="Selecione um alimento" value="" />
+        <Picker.Item label="Carne" value="Carne" />
+        <Picker.Item label="Peixe" value="Peixe" />
+        <Picker.Item label="Frango" value="Frango" />
+        {/* Adicione mais alimentos conforme necessário */}
       </Picker>
 
-      <Text>Data Inicial:</Text>
+      <Text>Data de Fabricação:</Text>
       <Button title={date.toDateString()} onPress={() => setShowDatePicker(true)} />
       {showDatePicker && (
         <DateTimePicker
@@ -83,18 +68,7 @@ const App = () => {
         />
       )}
 
-      <Button title="Imprimir Etiqueta" onPress={() => {
-        if (!selectedCondition || !selectedFood) {
-          alert('Por favor, selecione a condição de armazenamento e o alimento.');
-          return;
-        }
-
-        const validityDays = foodValidity[selectedCondition][selectedFood];
-        const expiryDate = new Date(date);
-        expiryDate.setDate(expiryDate.getDate() + validityDays);
-
-        alert(`A validade do ${selectedFood} é até ${expiryDate.toDateString()}`);
-      }} />
+      <Button title="Imprimir Etiqueta" onPress={handleCalculate} />
     </View>
   );
 };
@@ -107,12 +81,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0e0e0db',
   },
   picker: {
+    width: 300,
     height: 50,
-    width: 250,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 20,
+    backgroundColor: '#f5f5f5',
+    marginBottom: 10,
   },
 });
 
 export default App;
+
