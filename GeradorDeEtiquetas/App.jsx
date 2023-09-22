@@ -6,17 +6,26 @@
  */
 
 import React, { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Button } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const App = () => {
   const [selectedCondition, setSelectedCondition] = useState('');
   const [selectedFood, setSelectedFood] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const onChangeDate = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(false);
+    setDate(currentDate);
+  };
 
   return (
     <View style={styles.container}>
-      <Text>Etiqueta: Validade de Alimentos</Text>
-      
+      <Text>Gerador de Etiquetas: Validade de Alimentos</Text>
+
       <Text>Condição de Armazenamento:</Text>
       <Picker
         selectedValue={selectedCondition}
@@ -35,6 +44,22 @@ const App = () => {
       >
         {/* As opções serão preenchidas dinamicamente mais tarde */}
       </Picker>
+
+      <Text>Data Inicial:</Text>
+      <Button title={date.toDateString()} onPress={() => setShowDatePicker(true)} />
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={onChangeDate}
+        />
+      )}
+
+      <Button title="Imprimir Etiqueta" onPress={() => {
+        // Aqui, vamos implementar a lógica para calcular a validade.
+      }} />
+
     </View>
   );
 };
