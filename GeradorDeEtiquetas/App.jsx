@@ -156,21 +156,31 @@ const App = () => {
   };
 
   const handleCalculate = () => {
-    const calculatedExpiryDate = calcularValidade(); // Use o valor retornado
+    const calculatedExpiryDate = calcularValidade();
     console.log("Data de Fabricação Antes do Alerta:", formatDate(manufactureDate));
     console.log("Data de Validade Antes do Alerta:", formatDate(calculatedExpiryDate));
+
+    let displayCondition = selectedCondition;
+    if (selectedCondition === 'Seco (Após Abertura da Embalagem)' && 
+        (selectedFood === 'Alimentos enlatados' || 
+         selectedFood === 'Carnes e frios enlatados' || 
+         selectedFood === 'Sucos enlatados e engarrafados')) {
+        displayCondition = 'Refrigerado (Após a abertura da embalagem';
+    }
+
     if (calculatedExpiryDate) {
       Alert.alert(
-        "", // Removido "Etiqueta"
-        `Condição: ${selectedCondition}\n` +
+        "",
+        `Condição: ${displayCondition}\n` + // Usando displayCondition em vez de selectedCondition
         `Produto: ${selectedFood}\n` + 
-        `Fabricação: ${formatDate(manufactureDate)}\n` + // Usando a função formatDate
-        `Validade: ${formatDate(calculatedExpiryDate)}`  // Usando a função formatDate
+        `Fabricação: ${formatDate(manufactureDate)}\n` +
+        `Validade: ${formatDate(calculatedExpiryDate)}`
       );
     } else {
       Alert.alert('Erro', 'Regras de validade não definidas para o produto e condição selecionados.');
     }
 };
+
 
 
   return (
