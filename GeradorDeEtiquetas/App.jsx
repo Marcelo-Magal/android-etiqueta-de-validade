@@ -39,6 +39,13 @@ const alimentosPorCondicao = {
   ]
 };
 
+// Função auxiliar para formatar a data no formato desejado
+const formatDate = (date) => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 porque os meses começam de 0
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
 
 const App = () => {
   const [selectedCondition, setSelectedCondition] = useState('Refrigerado');
@@ -143,21 +150,28 @@ const App = () => {
     } else {
       const newExpiryDate = new Date(manufactureDate);
       newExpiryDate.setDate(manufactureDate.getDate() + tempoMaximoArmazenamento);
-      console.log("Data de Validade Calculada:", newExpiryDate); // Log para verificar a data de validade calculada
-      setExpiryDate(newExpiryDate);
+      console.log("Nova Data de Validade Definida:", newExpiryDate);
+      return newExpiryDate; // Adicionada a linha para retornar a nova data de validade
     }
   };
 
   const handleCalculate = () => {
-    calcularValidade();
-    Alert.alert(
-      "Etiqueta",
-      `Condição: ${selectedCondition}\n` +
-      `Alimento: ${selectedFood}\n` +
-      `Fabricação: ${manufactureDate.toDateString()}\n` +
-      `Validade: ${expiryDate.toDateString()}`
-    );
-  };
+    const calculatedExpiryDate = calcularValidade(); // Use o valor retornado
+    console.log("Data de Fabricação Antes do Alerta:", formatDate(manufactureDate));
+    console.log("Data de Validade Antes do Alerta:", formatDate(calculatedExpiryDate));
+    if (calculatedExpiryDate) {
+      Alert.alert(
+        "", // Removido "Etiqueta"
+        `Condição: ${selectedCondition}\n` +
+        `Produto: ${selectedFood}\n` + 
+        `Fabricação: ${formatDate(manufactureDate)}\n` + // Usando a função formatDate
+        `Validade: ${formatDate(calculatedExpiryDate)}`  // Usando a função formatDate
+      );
+    } else {
+      Alert.alert('Erro', 'Regras de validade não definidas para o produto e condição selecionados.');
+    }
+};
+
 
   return (
     <View style={styles.container}>
