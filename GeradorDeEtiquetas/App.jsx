@@ -1,25 +1,161 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+const alimentosPorCondicao = {
+  'Refrigerado': [
+    'Pescados e seus produtos manipulados crus',
+    'Carnes (bovina, suína, aves, etc.)',
+    'Sobremesas, frios e laticínios manipulados',
+    'Salsichas e conservados',
+    'Folhosos e frutas sensíveis',
+    'Outras frutas e legumes',
+    'Alimentos pós-cocção',
+    'Pescados pós-cocção',
+    'Ovos',
+    'Manteiga',
+    'Creme de leite fresco',
+    'Queijos duros',
+    'Queijos frescos ou macios',
+    'Maionese e misturas de maionese com outros alimentos'
+  ],
+  'Congelado -10°C a -18°C': [
+    'Todos os alimentos'
+  ],
+  'Congelado Temperatura menor que -18°C': [
+    'Todos os alimentos'
+  ],
+  'Seco (Após Abertura da Embalagem)': [
+    'Alimentos enlatados',
+    'Carnes e frios enlatados',
+    'Farinhas',
+    'Sucos enlatados e engarrafados',
+    'Temperos em pó',
+    'Sal',
+    'Açúcar',
+    'Fermento químico em pó',
+    'Bicarbonato de sódio'
+  ]
+};
+
+
 const App = () => {
-  const [selectedCondition, setSelectedCondition] = useState('');
+  const [selectedCondition, setSelectedCondition] = useState('Refrigerado');
   const [selectedFood, setSelectedFood] = useState('');
-  const [date, setDate] = useState(new Date());
+  const [manufactureDate, setManufactureDate] = useState(new Date());
+  const [expiryDate, setExpiryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  const calcularValidade = () => {
+    let tempoMaximoArmazenamento = 0;
+
+    if (selectedCondition === 'Refrigerado') {
+      switch (selectedFood) {
+        case 'Pescados e seus produtos manipulados crus':
+          tempoMaximoArmazenamento = 1;
+          break;
+        case 'Carnes (bovina, suína, aves, etc.)':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Sobremesas, frios e laticínios manipulados':
+          tempoMaximoArmazenamento = 1;
+          break;
+        case 'Salsichas e conservados':
+          tempoMaximoArmazenamento = 7;
+          break;
+        case 'Folhosos e frutas sensíveis':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Outras frutas e legumes':
+          tempoMaximoArmazenamento = 7;
+          break;
+        case 'Alimentos pós-cocção':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Pescados pós-cocção':
+          tempoMaximoArmazenamento = 1;
+          break;
+        case 'Ovos':
+          tempoMaximoArmazenamento = 14;
+          break;
+        case 'Manteiga':
+          tempoMaximoArmazenamento = 14;
+          break;
+        case 'Creme de leite fresco':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Queijos duros':
+          tempoMaximoArmazenamento = 21;
+          break;
+        case 'Queijos frescos ou macios':
+          tempoMaximoArmazenamento = 7;
+          break;
+        case 'Maionese e misturas de maionese com outros alimentos':
+          tempoMaximoArmazenamento = 1;
+          break;
+        default:
+          tempoMaximoArmazenamento = 0;
+      }
+    } else if (selectedCondition === 'Congelado -10°C a -18°C') {
+      tempoMaximoArmazenamento = 30;
+    } else if (selectedCondition === 'Congelado Temperatura menor que -18°C') {
+      tempoMaximoArmazenamento = 90;
+    } else if (selectedCondition === 'Seco (Após Abertura da Embalagem)') {
+      switch (selectedFood) {
+        case 'Alimentos enlatados':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Carnes e frios enlatados':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Farinhas':
+          tempoMaximoArmazenamento = 30;
+          break;
+        case 'Sucos enlatados e engarrafados':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Temperos em pó':
+          tempoMaximoArmazenamento = 30;
+          break;
+        case 'Sal':
+          tempoMaximoArmazenamento = 30;
+          break;
+        case 'Açúcar':
+          tempoMaximoArmazenamento = 30;
+          break;
+        case 'Fermento químico em pó':
+          tempoMaximoArmazenamento = 30;
+          break;
+        case 'Bicarbonato de sódio':
+          tempoMaximoArmazenamento = 30;
+          break;
+        default:
+          tempoMaximoArmazenamento = 0;
+      }
+    }
+
+    console.log("Tempo Máximo de Armazenamento:", tempoMaximoArmazenamento); // Log para verificar o tempo de armazenamento
+    console.log("Data de Fabricação:", manufactureDate); // Log para verificar a data de fabricação
+
+    if (tempoMaximoArmazenamento === 0) {
+      Alert.alert('Erro', 'Regras de validade não definidas para o alimento e condição selecionados.');
+    } else {
+      const newExpiryDate = new Date(manufactureDate);
+      newExpiryDate.setDate(manufactureDate.getDate() + tempoMaximoArmazenamento);
+      console.log("Data de Validade Calculada:", newExpiryDate); // Log para verificar a data de validade calculada
+      setExpiryDate(newExpiryDate);
+    }
+  };
+
   const handleCalculate = () => {
+    calcularValidade();
     Alert.alert(
       "Etiqueta",
-      `Condição: ${selectedCondition}\nAlimento: ${selectedFood}\nData: ${date.toDateString()}`
+      `Condição: ${selectedCondition}\n` +
+      `Alimento: ${selectedFood}\n` +
+      `Fabricação: ${manufactureDate.toDateString()}\n` +
+      `Validade: ${expiryDate.toDateString()}`
     );
   };
 
@@ -45,24 +181,22 @@ const App = () => {
         selectedValue={selectedFood}
         onValueChange={(itemValue) => setSelectedFood(itemValue)}
       >
-        <Picker.Item label="Selecione um alimento" value="" />
-        <Picker.Item label="Carne" value="Carne" />
-        <Picker.Item label="Peixe" value="Peixe" />
-        <Picker.Item label="Frango" value="Frango" />
-        {/* Adicione mais alimentos conforme necessário */}
+        {['Selecione um alimento', ...alimentosPorCondicao[selectedCondition]].map((alimento) => (
+          <Picker.Item key={alimento} label={alimento} value={alimento} />
+        ))}
       </Picker>
 
       <Text>Data de Fabricação:</Text>
-      <Button title={date.toDateString()} onPress={() => setShowDatePicker(true)} />
+      <Button title={manufactureDate.toDateString()} onPress={() => setShowDatePicker(true)} />
       {showDatePicker && (
         <DateTimePicker
-          value={date}
+          value={manufactureDate}
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
             if (selectedDate) {
-              setDate(selectedDate);
+              setManufactureDate(selectedDate);
             }
           }}
         />
