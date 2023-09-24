@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert, Button, TouchableOpacity, } from 'react-native';
+
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -53,6 +54,7 @@ const App = () => {
   const [manufactureDate, setManufactureDate] = useState(new Date());
   const [expiryDate, setExpiryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [hasDateBeenSelected, setDateSelected] = useState(false);
 
   const calcularValidade = () => {
     let tempoMaximoArmazenamento = 0;
@@ -183,11 +185,12 @@ const App = () => {
 
 
 
-  return (
-    <View style={styles.container}>
-      <Text>Gerador de Etiquetas: Validade de Alimentos</Text>
+return (
+  <View style={styles.container}>
+    <Text style={styles.title}>Validade de Alimentos</Text>
 
-      <Text>Condição de Armazenamento:</Text>
+    <Text style={styles.label}>Condição de Armazenamento:</Text>
+    <View style={styles.pickerContainer}>
       <Picker
         style={styles.picker}
         selectedValue={selectedCondition}
@@ -198,53 +201,113 @@ const App = () => {
         <Picker.Item label="Congelado Temperatura menor que -18°C" value="Congelado Temperatura menor que -18°C" />
         <Picker.Item label="Seco (Após Abertura da Embalagem)" value="Seco (Após Abertura da Embalagem)" />
       </Picker>
+    </View>
 
-      <Text>Alimento:</Text>
+    <Text style={styles.label}>Produto:</Text>
+    <View style={styles.pickerContainer}>
       <Picker
         style={styles.picker}
         selectedValue={selectedFood}
         onValueChange={(itemValue) => setSelectedFood(itemValue)}
       >
-        {['Selecione um alimento', ...alimentosPorCondicao[selectedCondition]].map((alimento) => (
-          <Picker.Item key={alimento} label={alimento} value={alimento} />
+        {['Selecione um produto', ...alimentosPorCondicao[selectedCondition]].map((produto) => (
+          <Picker.Item key={produto} label={produto} value={produto} />
         ))}
       </Picker>
-
-      <Text>Data de Fabricação:</Text>
-      <Button title={manufactureDate.toDateString()} onPress={() => setShowDatePicker(true)} />
-      {showDatePicker && (
-        <DateTimePicker
-          value={manufactureDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
-            if (selectedDate) {
-              setManufactureDate(selectedDate);
-            }
-          }}
-        />
-      )}
-
-      <Button title="Imprimir Etiqueta" onPress={handleCalculate} />
     </View>
-  );
+
+    <Text style={styles.label}>Data de Fabricação:</Text>
+    <View style={styles.dateButtonContainer}>
+      <TouchableOpacity style={styles.buttonContainer} onPress={() => setShowDatePicker(true)}>
+        <Text style={styles.buttonText}>
+          {hasDateBeenSelected ? manufactureDate.toLocaleDateString('pt-BR') : "Escolha a data"}
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.buttonContainer} onPress={handleCalculate}>
+        <Text style={styles.buttonText}>Imprimir Etiqueta</Text>
+      </TouchableOpacity>
+    </View>
+
+    {showDatePicker && (
+      <DateTimePicker
+        value={manufactureDate}
+        mode="date"
+        display="default"
+        onChange={(event, selectedDate) => {
+          setShowDatePicker(false);
+          if (selectedDate) {
+            setManufactureDate(selectedDate);
+            setDateSelected(true);
+          }
+        }}
+      />
+    )}
+  </View>
+);
+
+
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 15, // Reduzido o padding para 15
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#e0e0e0db',
+    backgroundColor: '#F5F5F5',
   },
-  picker: {
-    width: 300,
+  pickerContainer: {
+    width: '90%',
     height: 50,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(98, 0, 234, 0.1)', // Cor azul transparente
+    borderColor: '#6200EA',
+    borderWidth: 1,
+    borderRadius: 8,
+    justifyContent: 'center', // Centraliza o conteúdo verticalmente
+    marginBottom: 10, // Espaçamento entre os pickers
+},
+
+picker: {
+    width: '100%',
+    height: 50,
+    backgroundColor: 'transparent',
+    flexDirection: 'row', // Adicionado para tentar centralizar o texto
+    textAlign: 'center', // Centraliza o texto horizontalmente
+},
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#6200EA',
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  label: {
+    fontSize: 18,
+    color: '#666666',
     marginBottom: 10,
   },
+  dateButtonContainer: {
+    marginBottom: 20,
+    marginLeft: 0,
+  },
+  buttonContainer: {
+    width: '90%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#6200EA',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
 });
+
+
+
+
 
 export default App;
 
