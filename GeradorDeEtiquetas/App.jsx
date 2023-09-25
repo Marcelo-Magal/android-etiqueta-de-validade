@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, Button, TouchableOpacity, } from 'react-native';
-
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Etiqueta from './etiqueta/etiqueta'; // Ajuste o caminho conforme necessário
 
 const alimentosPorCondicao = {
   'Refrigerado': [
@@ -49,12 +49,17 @@ const formatDate = (date) => {
 };
 
 const App = () => {
+  const [conditionForDisplay, setConditionForDisplay] = useState('');
   const [selectedCondition, setSelectedCondition] = useState('Refrigerado');
   const [selectedFood, setSelectedFood] = useState('');
   const [manufactureDate, setManufactureDate] = useState(new Date());
   const [expiryDate, setExpiryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [hasDateBeenSelected, setDateSelected] = useState(false);
+  const [showLabel, setShowLabel] = useState(false);
+  const [calculatedExpiryDateState, setCalculatedExpiryDateState] = useState(null);
+
+
 
   const calcularValidade = () => {
     let tempoMaximoArmazenamento = 0;
@@ -148,7 +153,7 @@ const App = () => {
     console.log("Data de Fabricação:", manufactureDate); // Log para verificar a data de fabricação
 
     if (tempoMaximoArmazenamento === 0) {
-      Alert.alert('Erro', 'Regras de validade não definidas para o alimento e condição selecionados.');
+      return null;
     } else {
       const newExpiryDate = new Date(manufactureDate);
       newExpiryDate.setDate(manufactureDate.getDate() + tempoMaximoArmazenamento);
@@ -158,36 +163,47 @@ const App = () => {
   };
 
   const handleCalculate = () => {
+
+    if (!selectedFood || selectedFood === 'Selecione um produto') {
+      Alert.alert('Erro', 'Por favor, selecione um produto antes de imprimir a etiqueta.');
+      return;
+    }
+
     const calculatedExpiryDate = calcularValidade();
+    if (calculatedExpiryDate === null) {
+      Alert.alert('Erro', 'Regras de validade não definidas para o produto e condição selecionados.');
+      return;
+    }
     console.log("Data de Fabricação Antes do Alerta:", formatDate(manufactureDate));
     console.log("Data de Validade Antes do Alerta:", formatDate(calculatedExpiryDate));
+    setCalculatedExpiryDateState(calculatedExpiryDate);
 
-    let displayCondition = selectedCondition;
+
+    let newConditionForDisplay = selectedCondition;
+
     if (selectedCondition === 'Seco (Após Abertura da Embalagem)' && 
         (selectedFood === 'Alimentos enlatados' || 
          selectedFood === 'Carnes e frios enlatados' || 
          selectedFood === 'Sucos enlatados e engarrafados')) {
-        displayCondition = 'Refrigerado (Após a abertura da embalagem';
+          newConditionForDisplay = 'Refrigerado (Após a abertura da embalagem';
     }
 
+    setConditionForDisplay(newConditionForDisplay);
     if (calculatedExpiryDate) {
-      Alert.alert(
-        "",
-        `Condição: ${displayCondition}\n` + // Usando displayCondition em vez de selectedCondition
-        `Produto: ${selectedFood}\n` + 
-        `Fabricação: ${formatDate(manufactureDate)}\n` +
-        `Validade: ${formatDate(calculatedExpiryDate)}`
-      );
+        setShowLabel(true); // Atualize o estado para mostrar a etiqueta
     } else {
-      Alert.alert('Erro', 'Regras de validade não definidas para o produto e condição selecionados.');
+        Alert.alert('Erro', 'Regras de validade não definidas para o produto e condição selecionados.');
     }
 };
 
 
 
+
 return (
   <View style={styles.container}>
+    <Text style={styles.title}>Gerador de Etiqueta:</Text>
     <Text style={styles.title}>Validade de Alimentos</Text>
+
 
     <Text style={styles.label}>Condição de Armazenamento:</Text>
     <View style={styles.pickerContainer}>
@@ -225,9 +241,9 @@ return (
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.buttonContainer} onPress={handleCalculate}>
-        <Text style={styles.buttonText}>Imprimir Etiqueta</Text>
-      </TouchableOpacity>
-    </View>
+          <Text style={styles.buttonText}>Imprimir Etiqueta</Text>
+        </TouchableOpacity>
+      </View>
 
     {showDatePicker && (
       <DateTimePicker
@@ -243,6 +259,16 @@ return (
         }}
       />
     )}
+
+    {showLabel && (
+      <Etiqueta 
+        condicao={conditionForDisplay}
+        produto={selectedFood}
+        fabricacao={formatDate(manufactureDate)}
+        validade={formatDate(calculatedExpiryDateState)}
+
+      />
+    )}
   </View>
 );
 
@@ -252,28 +278,26 @@ return (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15, // Reduzido o padding para 15
+    padding: 20,
     justifyContent: 'center',
     backgroundColor: '#F5F5F5',
+    
   },
   pickerContainer: {
-    width: '90%',
+    width: '100%',
     height: 50,
-    backgroundColor: 'rgba(98, 0, 234, 0.1)', // Cor azul transparente
+    backgroundColor: 'rgba(98, 0, 234, 0.1)',
     borderColor: '#6200EA',
     borderWidth: 1,
     borderRadius: 8,
-    justifyContent: 'center', // Centraliza o conteúdo verticalmente
-    marginBottom: 10, // Espaçamento entre os pickers
-},
-
-picker: {
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  picker: {
     width: '100%',
     height: 50,
     backgroundColor: 'transparent',
-    flexDirection: 'row', // Adicionado para tentar centralizar o texto
-    textAlign: 'center', // Centraliza o texto horizontalmente
-},
+  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -284,20 +308,21 @@ picker: {
   label: {
     fontSize: 18,
     color: '#666666',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   dateButtonContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
     marginBottom: 20,
-    marginLeft: 0,
   },
   buttonContainer: {
-    width: '90%',
+    width: '100%',
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#6200EA',
     borderRadius: 8,
-    marginBottom: 20,
+    marginBottom: 15,
   },
   buttonText: {
     color: '#FFFFFF',
@@ -305,9 +330,4 @@ picker: {
   },
 });
 
-
-
-
-
 export default App;
-
