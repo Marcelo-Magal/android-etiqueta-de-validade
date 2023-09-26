@@ -6,20 +6,24 @@ import Etiqueta from './etiqueta/etiqueta'; // Ajuste o caminho conforme necess�
 
 const alimentosPorCondicao = {
   'Refrigerado': [
-    'Pescados e seus produtos manipulados crus',
-    'Carnes (bovina, suína, aves, etc.)',
-    'Sobremesas, frios e laticínios manipulados',
-    'Salsichas e conservados',
-    'Folhosos e frutas sensíveis',
-    'Outras frutas e legumes',
+    'Alimentos enlatados',
     'Alimentos pós-cocção',
-    'Pescados pós-cocção',
-    'Ovos',
-    'Manteiga',
+    'Carnes (bovina, suína, aves, etc.)',
+    'Carnes e frios enlatados',
     'Creme de leite fresco',
+    'Folhosos e frutas sensíveis',
+    'Maionese e misturas de maionese com outros alimentos',
+    'Manteiga',
+    'Ovos',
+    'Outras frutas e legumes',
+    'Pescados e seus produtos manipulados crus',
+    'Pescados pós-cocção',
     'Queijos duros',
     'Queijos frescos ou macios',
-    'Maionese e misturas de maionese com outros alimentos'
+    'Salsichas e conservados',
+    'Sobremesas, frios e laticínios manipulados',
+    'Sucos enlatados e engarrafados'
+
   ],
   'Congelado -10°C a -18°C': [
     'Todos os alimentos'
@@ -108,6 +112,15 @@ const App = () => {
         case 'Maionese e misturas de maionese com outros alimentos':
           tempoMaximoArmazenamento = 1;
           break;
+        case 'Alimentos enlatados':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Carnes e frios enlatados':
+          tempoMaximoArmazenamento = 3;
+          break;
+        case 'Sucos enlatados e engarrafados':
+          tempoMaximoArmazenamento = 3;
+          break;
         default:
           tempoMaximoArmazenamento = 0;
       }
@@ -188,6 +201,13 @@ const App = () => {
           newConditionForDisplay = 'Refrigerado (Após a abertura da embalagem';
     }
 
+    if (selectedCondition === 'Refrigerado' && 
+        (selectedFood === 'Alimentos enlatados' || 
+         selectedFood === 'Carnes e frios enlatados' || 
+         selectedFood === 'Sucos enlatados e engarrafados')) {
+          newConditionForDisplay = 'Refrigerado (Após a abertura da embalagem';
+    }
+
     setConditionForDisplay(newConditionForDisplay);
     if (calculatedExpiryDate) {
         setShowLabel(true); // Atualize o estado para mostrar a etiqueta
@@ -201,8 +221,8 @@ const App = () => {
 
 return (
   <View style={styles.container}>
-    <Text style={styles.title}>Gerador de Etiqueta:</Text>
-    <Text style={styles.title}>Validade de Alimentos</Text>
+    <Text style={styles.title1}>Gerador de Etiqueta:</Text>
+    <Text style={styles.title2}>Validade de Alimentos</Text>
 
 
     <Text style={styles.label}>Condição de Armazenamento:</Text>
@@ -240,9 +260,9 @@ return (
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonContainer} onPress={handleCalculate}>
+      <TouchableOpacity style={styles.printButtonContainer} onPress={handleCalculate}>
           <Text style={styles.buttonText}>Imprimir Etiqueta</Text>
-        </TouchableOpacity>
+      </TouchableOpacity>
       </View>
 
     {showDatePicker && (
@@ -279,14 +299,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
-    backgroundColor: '#F5F5F5',
+    justifyContent: 'flex-star',
+    backgroundColor: '#e8edf5',
     
   },
   pickerContainer: {
     width: '100%',
     height: 50,
-    backgroundColor: 'rgba(98, 0, 234, 0.1)',
+    backgroundColor: '#6200EA',
     borderColor: '#6200EA',
     borderWidth: 1,
     borderRadius: 8,
@@ -297,9 +317,17 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     backgroundColor: 'transparent',
+    color: '#FFFFFF',
   },
-  title: {
-    fontSize: 24,
+  title1: {
+    fontSize: 35,
+    fontWeight: 'bold',
+    color: '#6200EA',
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+    title2: {
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#6200EA',
     marginBottom: 20,
@@ -314,6 +342,15 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  printButtonContainer: {
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'red', // Cor de fundo vermelha
+    borderRadius: 8,
+    marginBottom: 15,
   },
   buttonContainer: {
     width: '100%',

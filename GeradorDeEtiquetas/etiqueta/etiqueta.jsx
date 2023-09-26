@@ -27,15 +27,16 @@ const styles = StyleSheet.create({
     borderColor: 'red',
     marginTop: 20,
     alignItems: 'flex-start',
-    width: Dimensions.get('window').width * 0.8,
+    width: Dimensions.get('window').width * 0.9 - 8,
     justifyContent: 'center',
     alignSelf: 'center',
+    backgroundColor: 'white',
   },
   container: {
     padding: 15,
     backgroundColor: 'white',
     alignItems: 'left',
-    paddingLeft: 20,
+    paddingLeft: 8,
   },
   text: {
     fontSize: 16,
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
   },
   customFont: {
     fontFamily: 'Caveat-Regular',
-    fontSize: 25,
+    fontSize: 29,
     color: 'blue',
   },
 });
